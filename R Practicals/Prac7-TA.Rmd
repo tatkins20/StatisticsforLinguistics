@@ -1,0 +1,68 @@
+---
+title: "Practical 7"
+author: "Trevor Atkins"
+date: "10/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### a
+
+Variables:
+
+The independent variable is motivation as a nominal measure and the dependent variable is pronunciation (difference in vowel length) as a interval measure. The independent variable has 2 levels ("high" and "low").
+
+Appropriate perspective: 
+
+Comparing the means between the high and low motivation groups, the appropriate statistical test will be the t-test.
+
+```{r}
+data7a <- readRDS(file="data7a.rds")
+str(data7a)
+```
+
+```{r}
+by(data7a$difference, data7a$Motivation, mean)
+by(data7a$difference, data7a$Motivation, min)
+by(data7a$difference, data7a$Motivation, max)
+by(data7a$difference, data7a$Motivation, sd)
+```
+
+**Table 1**: Descriptives for the two motivation groups
+
+value | High Motivation | Low Motivation |
+mean |    47           |      16.33      |
+minimum |   -7         |      -11        |
+maximum|    109        |      71         |
+sd |     36.32         |      27.79      |
+
+
+```{r}
+library("pastecs")
+by(data7a$difference, data7a$Motivation, stat.desc, basic=FALSE, norm=TRUE)
+```
+
+The Shapiro Wilk's p-value for the low motivation group is 0.00348802, which is less than the significance value of 0.05 so the low motivation group data is not normally distributed although the p-value for the high motivation group is 0.8987226 so it accepts the null hypothesis that the high motivation group data is normally distributed.
+
+```{r}
+hist(data7a$difference[data7a$Motivation =="high"], prob=TRUE, xlab = "difference", main = "histogram of difference for highly motivated students")
+curve(dnorm(x, mean=mean(data7a$difference[data7a$Motivation =="high"]), sd=sd(data7a$difference[data7a$Motivation =="high"])), add=TRUE)
+```
+```{r}
+hist(data7a$difference[data7a$Motivation =="low"], prob=TRUE, xlab = "difference", main = "histogram of difference for low motivated students")
+curve(dnorm(x, mean=mean(data7a$difference[data7a$Motivation =="low"]), sd=sd(data7a$difference[data7a$Motivation =="low"])), add=TRUE)
+```
+
+**Figure 1: ** Boxplot of Pronunciation as a function of Motivation group
+
+```{r}
+boxplot(difference~Motivation, data=data7a, main="Pronunciation over Motivation", xlab="Motivation group", ylab="Difference in Vowel Length")
+```
+
+#### b
+
+

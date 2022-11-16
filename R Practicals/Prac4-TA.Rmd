@@ -1,0 +1,258 @@
+---
+title: "Practical 4"
+author: "Student Number: S4555376, Name: Trevor Atkins"
+date: "9/29/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Part A: Reading and listening
+
+#### 1
+
+```{r}
+Student <- seq(1,8)
+Reading <- c(20, 40, 60, 80, 100, 120, 140, 160)
+Listening <- c(65, 69, 73, 77, 80, 84, 89, 95)
+Practical4a = data.frame(Student, Reading, Listening)
+Practical4a$Student <- as.factor(Practical4a$Student)
+```
+
+#### 2 
+
+If we wanted to test the relationship between reading and listening comprehension, the H0 would be that there is no significant relationship or difference between reading and listening comprehension.
+
+#### 3
+
+The mean and standard deviation was not asked to be calculated for the reading and listening comprehension variables because it is such a small sample size of 8 students.
+
+#### 4
+
+```{r}
+plot(Reading,Listening, xlab="Reading Comprehension",ylab="Listening Comprehension")
+```
+
+#### 5
+
+At face value, I think that reading and listening, as plotted in the graph, are related. 
+
+#### 6
+
+```{r}
+library("pastecs")
+stat.desc(Practical4a$Reading, basic=FALSE, norm=TRUE)
+stat.desc(Practical4a$Listening, basic=FALSE, norm=TRUE)
+shapiro.test(Reading)
+shapiro.test(Listening)
+```
+For samples less than 30, if the Skew.2SE and Kurt.2SE are in a range between -1 and 1 we can assume normality. For Reading, the Skew.2SE is 0.00 and Kurt.2SE is -0.56. For Listening, the Skew.2SE is 0.10 and Kurt.2SE is -0.51. If the significance value (p-value) for the Shapiro-Wilk test is above 0.05, then we can assume that the data is normally distributed. For Reading the p-value is 0.93 and for Listening the p-value is 0.98. Therefore, we can assume that the data is approximately normally distributed.
+
+#### 7 
+
+```{r}
+cor.test(Reading,Listening,method="pearson")
+```
+The value of rxy is 0.996. This is a strong correlation. The chance of incorrectly rejecting my H0 is 5 percent. I decide to reject the null hypothesis. The effect size is large.
+
+#### 8 
+
+A Pearson r correlation analysis showed that Reading Skills and Listening Skills were significantly positively related (r({6}) = {0.996},
+p = {p <.001}, two tailed, 95% CI [{0.978},{0.999}]).
+
+## Part B: Social class
+
+#### 1
+
+In this study the variables include: 
+
+low social class (independent, nominal)
+high social class (independent, nominal)
+use of haven't got (dependent, nominal)
+use of don't have (dependent, nominal)
+
+#### 2
+
+I would formulate H0 as there is no significant relation between social class and the use of 'haven't got' versus 'don't have', whereas I would formulate Ha as there is a significant relation between social class and the use of 'haven't got' verus 'don't have'. 
+
+#### 3
+
+The statistic test that could be used is the Shapiro-Wilk normality test.
+
+#### 4
+
+```{r}
+Table <- cbind(c(70,64),c(59,31))
+rownames(Table) <- c("Haven't Got","Don't Have")
+colnames(Table) <- c("Low Social Class","High Social Class")
+```
+
+#### 5
+
+```{r}
+library("gmodels")
+CrossTable(Table, chisq=TRUE, expected=TRUE)
+```
+
+The assumptions concerning the expected frequencies have been met.
+
+#### 6 
+
+Since the p-value is less than 0.05 and the Chi-square value is larger than the critical value we can reject the null hypothesis.
+
+#### 7
+
+```{r}
+library("vcd")
+assocstats(Table)
+```
+With the Phi-Coefficient and Cramer's V values at 0.132, the effect size is small.
+
+#### 8
+
+A chi-square analysis revealed that the association between social class and the use of 'haven't got' versus 'don't have' was {significant}, χ2({1}, N={8}) = {3.9454}, p = {0.046999}. The direction of the association is that the high social class has a strong relation with using "haven't got" over "don't have". The $\phi$ coefficient value is 0.132. 
+
+```{r}
+barplot(Table, beside = TRUE, col = c("red", "blue"), main = "Respondents of Social Class with 'Haven't Got' versus 'Don't Have'",
+xlab = "Social Class", ylab="Number of Respondents")
+legend("topright", fill = c("red", "blue"), c("'Haven't Got'", "'Don't Have'"))
+```
+Looking at barplot in the help menu another way to add a legend to the barplot is by adding the legend.text and args.legend in the parameters of the barplot function.
+
+#### 9 
+
+If the beside=TRUE is removed or changed to beside=FALSE from the code, then the columns of height are portrayed as stacked bars rather than the juxtaposed bars.
+
+## Part C: Gender and intelligence
+
+#### 1
+
+The independent variable is gender (nominal measure) and the dependent variable is intelligence (interval/scale measure).
+
+#### 2
+
+The independent variable has 2 levels.
+
+#### 3
+
+The H0 is that there is no significant relation between gender and intelligence and the Ha is that there is a significant relation between gender and intelligence.
+
+#### 4
+
+The statistical tests that could be used are the independent samples (Shapiro-Wilk) t-test or paired samples t-test.
+
+#### 5
+
+```{r}
+library("psych")
+Gender <- c("girl","girl","girl","girl","girl","girl","girl","girl","girl","girl","girl","boy","boy","boy","boy","boy","boy","boy","boy")
+IntellectScore <- c(17,16,14,19,18,17,16,15,16,15,19,16,15,13,19,15,14,13,12)
+Practical4b = data.frame(Gender, IntellectScore)
+Practical4b$Gender <- as.factor(Practical4b$Gender)
+```
+
+#### 6
+
+```{r}
+Female <- subset(Practical4b, Gender == "girl")
+Male <- subset(Practical4b, Gender == "boy")
+aggregate(IntellectScore~Gender, Practical4b, max)
+aggregate(IntellectScore~Gender, Practical4b, min)
+aggregate(IntellectScore~Gender, Practical4b, mean)
+aggregate(IntellectScore~Gender, Practical4b, sd)
+describe(Practical4b$IntellectScore)
+```
+
+value | Overall | Female | Male | 
+-    | -     | -    | -     | 
+mean | 15.74 | 16.55 | 14.63 |
+max | 19 | 19 | 19 |
+min | 12 | 14 | 12 |
+sd | 2.08  | 1.63 | 2.20 | 
+
+#### 7
+
+My first impressions about the difference between the boys and girls are that the girls have higher intelligence scores.
+
+#### 8
+
+```{r}
+boxplot(IntellectScore~Gender, data=Practical4b, main="Intellect Score over Gender", xlab="Gender", ylab="Intellect Score")
+```
+#### 9
+
+```{r}
+hist(Practical4b$IntellectScore, prob=TRUE, xlab="Intellect Score")
+curve(dnorm(x, mean=mean(Practical4b$IntellectScore),sd=sd(Practical4b$IntellectScore)), add=TRUE)
+```
+```{r}
+stat.desc(Practical4b$IntellectScore, basic=FALSE, norm=TRUE)
+by(Practical4b$IntellectScore, Practical4b$Gender, stat.desc,
+basic=FALSE, norm=TRUE)
+library('car')
+leveneTest(IntellectScore~Gender, data=Practical4b)
+test <- t.test(Practical4b$IntellectScore ~ Practical4b$Gender, var.equal = FALSE)
+test
+```
+
+The value of t is -2.0856. The degree of freedom is 12.357. The level of significance or p-value is 0.05838. The 95 percent confidence interval is -3.92030824 and 0.07939915. Since the level of significance is larger than 0.05, H0 cannot be rejected. As the two outer ends of the spectrum are both positive, then the chance of the difference being positive is relatively large.
+
+#### 10
+
+A paired sample t-test compares means from the same group at different times and a one sample t-test tests the mean of a single group against a known mean, so using an independent samples t-test that compares the means for two groups makes the most appropriate sense in the context of the data provided.
+
+#### 11
+
+```{r}
+t <- test$statistic[[1]]
+df <- test$parameter[[1]]
+r2 <- t^2/(t^2+df)
+r2
+library('effsize')
+cohen.d(Practical4b$IntellectScore,Practical4b$Gender)
+```
+We found a large effect size. What this would mean for the number of participants I need to get enough power is small, although there is a fair chance that it is mistaken since there is only 19 participants in total as big effects can be detected with small sample sizes whereas to detect smaller effects larger samples are needed. 
+
+#### 12
+
+An independent samples t-test revealed that, on average, the {girls} showed
+a higher level of intelligence (M={16.5455}, SD= {1.6348}) than the {boys} (M={14.6250}, SD= {2.1998}). This difference was {not significant}, t({12.357})= {-2.0856}, p = {0.05838)}, 95% CI [{ -3.92030824}, {0.07939915}]. This effect was of a {large} size, r2/d = {0.2603588}.
+
+#### 13
+
+The meaningfulness of this outcome is that we cannot yet assume that there is a significant relation between gender and intellegince.
+
+#### 14
+
+Additional information I would like to have about this study include:
+How well each gender scored on each question on the test. 
+
+## Part D: Alpha - This assignment is slightly more 
+
+#### 1
+
+```{r}
+Practical3a <- read.csv(file="/Users/trekkatkins/Documents/R Practicals/Data-Practical3a.csv",sep=";")
+str(Practical3a)
+```
+
+#### 2
+
+```{r}
+Questions <- Practical3a[, c(4:20)]
+psych::alpha(Questions)
+```
+
+#### 3
+
+A general accepted rule is that a Cronbach alpha that is 0.6 to 0.8 is considered an acceptable level of reliability.
+
+#### 4 
+
+Removing any of the items would not substantially improve the reliability of the test since none of the values are greater than the overall alpha value.
+
+#### 5
+
+The items that should be removed because of problematic r.drop correlations include: Q9 with a r.drop value below 0.3 with a value of 0.253, Q11 with a value of 0.172, Q12 with a value of 0.194, Q14 with a value of 0.015, and Q15 with a value of 0.196.
+

@@ -1,0 +1,193 @@
+---
+title: "Practical 2"
+author: "Trevor Atkins"
+date: "9/8/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part A
+### 1. Open data
+#### 1a
+```{r}
+Practical1 <- readRDS(file="Practical1.rds")
+```
+### 2. First Calculations: Descriptive Statistics
+```{r}
+table(Practical1$age)
+```
+The ages that occur most often are tied at 3 times with age 16, 18, 20, 21, 22, and 24. 
+
+### 3. More Descriptives: Exploring Frequencies
+#### 3a
+```{r}
+mean(Practical1$profsc)
+median(Practical1$profsc)
+range(Practical1$profsc)
+sd(Practical1$profsc)
+which.max(tabulate(Practical1$profsc))
+```
+The mean or average of the Proficiency Score is 69.1. The median of the Proficiency Score is 68. The range of the Proficiency Score is from 33 to 97.
+The standard deviation of the Proficiency Score is 16.5, which means that the values tend to be close to the mean of the set. The mode of the Proficiency Score is 59. 
+#### 3b
+```{r}
+min(Practical1$age)
+max(Practical1$age)
+range(Practical1$age)
+sd(Practical1$age)
+```
+The minimum age is 14 and the maximum age is 27. The standard deviation of age is 3.53.
+
+#### 3b
+The most frequently occuring proficiency score is the mode, which is 59.
+
+### 4. Getting to Know the Data: Relationships
+#### 4a-b
+```{r}
+plot(Practical1$age, Practical1$profsc, xlab="Age of Acquisition", ylab="Proficiency Score", main="Age over Proficiency")
+```
+
+**Figure 1** Scatterplot showing the relationship between Age of Acquisition and Proficiency
+
+#### 4c
+At face value, I think there is a relationship between the two variables:
+as the age of acquisition increases, the proficiency of the learner decreases.
+
+### 5. Getting to Know the Data: Comparing Groups
+#### 5a
+```{r}
+aggregate(Practical1$profsc~Practical1$gender, Practical1, mean)
+```
+
+#### 5b
+The female participants has higher proficiency scores
+
+```{r}
+aggregate(Practical1$profsc~Practical1$gender, Practical1, sd)
+```
+#### 5c
+The male participants scored more homogeneously. 
+
+```{r}
+boxplot(Practical1$profsc~Practical1$gender, data=Practical1, main="Proficiency over Gender", xlab="Gender", ylab="Proficiency Score")
+```
+**Figure 2** Boxplot showing the comparison of proficiency score between genders. 
+
+The median or middle quartile marks the mid-point of the data and is by the bold line that splits the box in half. Half are greater than equal to this value and half are less than equal to this value. Inter-quartile range, the box represents the middle 50% of scores for the group. Upper quartile: 75% of scores fall below the upper quartile. Lower quartile: 25% of scores fall below the lower quartile.  
+
+## Part B
+### 1. Entering Data Manually
+#### 1a
+
+```{r}
+a <- c(3,4,5,6,7,8,9)
+b <- c(6,6,6,6,6,6,6)
+c <- c(4,4,4,6,7,7,10)
+d <- c(1,1,1,4,9,12,14)
+install.packages("psych")
+library("psych")
+mode <- function(z){
+  unique_element <- unique(z)
+  unique_element[which.max(tabulate(match(z,unique_element)))]
+}
+describe(a)
+mode(a)
+describe(b)
+mode(b)
+describe(c)
+mode(c)
+describe(d)
+mode(d)
+```
+#### 1b
+No, I do not agree with R's calculation of the mode for variable 'a' because there should be no mode as no number appears more frequently than any other in the list.
+
+## Part C
+### 1. Load the File Into R
+#### 1a
+```{r}
+Practical2 <- read.csv(file="Data-Practical2C.csv", head=TRUE, sep=";")
+Practical2$Motivation <- as.ordered(Practical2$Motivation)
+Practical2$Motivation <- ordered(Practical2$Motivation,
+levels = c(1,2,3,4,5),
+labels = c("very low", "low", "neutral", "high", "very high"))
+saveRDS(Practical2, file="Practical2.rds")
+write.csv(Practical2, file="Practical2C.csv")
+summary(Practical2)
+str(Practical2)
+```
+### 2. Descriptive Statistics
+#### 2a
+```{r}
+aggregate(Proficiency~Motivation, Practical2, mean)
+aggregate(Proficiency~Motivation, Practical2, median)
+aggregate(Proficiency~Motivation, Practical2, sd)
+describe(Practical2$Proficiency)
+mode(Practical2$Proficiency)
+VeryLow <- Practical2$Proficiency[Practical2$Motivation == "very low"]
+Low <- Practical2$Proficiency[Practical2$Motivation == "low"]
+Neutral <- Practical2$Proficiency[Practical2$Motivation == "neutral"]
+High <- Practical2$Proficiency[Practical2$Motivation == "high"]
+VeryHigh <- Practical2$Proficiency[Practical2$Motivation == "very high"]
+mode(VeryLow)
+mode(Low)
+mode(Neutral)
+mode(High)
+mode(VeryHigh)
+```
+Table 1: Shows the Mean, Mode, Median, and Standard Deviation Proficiency Scores for the Overall participants and by Motivation Level
+
+value | Overall | very low | low | neutral | high | very high
+- | - | - | - | - | - | -
+mean | 46.85 | 39.4 | 49.3 | 45.8 | 48.2 | 54.8
+mode | 49 | 60 | 40 | 28 | 66 | 64
+median | 46.5| 41.0 | 50.0 | 47.0 | 46.0 | 60.5
+sd | 16.5 | 15.9 | 15.8 | 16.9 | 15.2 | 17.2
+
+#### 2b
+```{r}
+boxplot(Proficiency~Motivation, data=Practical2, main="Proficiency over Motivation", xlab="Motivation", ylab="Proficiency Score")
+```
+Judging from the boxplot, I think the groups will differ from one another. As the motivation increases, the upper quartile increases and the lower quartile decreases. Which means most of the higher motivation groups will have a higher percentage of people who have higher proficiency scores and a lower percentage of people who have lower proficiency scores.
+
+### 3. Checking the Normal Distribution
+#### 3a
+```{r}
+hist(Practical2$Proficiency, prob=TRUE, xlab="Proficiency")
+curve(dnorm(x, mean=mean(Practical2$Proficiency),sd=sd(Practical2$Proficiency)), add=TRUE)
+```
+
+#### 3b 
+
+By looking at the histogram, the data seems to follow a normal bell curve distribution.
+
+#### 3c 
+```{r}
+describe(Practical2$Proficiency)
+```
+Skewness and kurtosis deviate from zero. Skewness is positive and kurtosis is negative. Positive skew shows that the there is a bigger distribution on the right side of the curve and the mean will be greater than the median. A negative kurtosis shows that a distribution is flat and has thin tails.
+
+#### 3d
+```{r}
+hist(VeryLow, prob=TRUE, xlab="Very Low Motivation Proficiency")
+curve(dnorm(x, mean=mean(VeryLow),sd=sd(VeryLow)), add=TRUE)
+hist(Low, prob=TRUE, xlab="Low Motivation Proficiency")
+curve(dnorm(x, mean=mean(Low),sd=sd(Low)), add=TRUE)
+hist(Neutral, prob=TRUE, xlab="Neutral Motivation Proficiency")
+curve(dnorm(x, mean=mean(Neutral),sd=sd(Neutral)), add=TRUE)
+hist(High, prob=TRUE, xlab="High Motivation Proficiency")
+curve(dnorm(x, mean=mean(High),sd=sd(High)), add=TRUE)
+hist(VeryHigh, prob=TRUE, xlab="Very High Motivation Proficiency")
+curve(dnorm(x, mean=mean(VeryHigh),sd=sd(VeryHigh)), add=TRUE)
+describe(VeryLow)
+describe(Low)
+describe(Neutral)
+describe(High)
+describe(VeryHigh)
+```
+By looking at the histogram, all of the data groups except for the Neutral Motivation seems to not follow a normal bell curve distribution. Also all of the groups seem to have a positive skew and negative kurtosis.
+
+

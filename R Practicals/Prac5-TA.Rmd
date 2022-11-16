@@ -1,0 +1,308 @@
+---
+title: "Practical 5"
+author: "Student Number: S4555376, Name: Trevor Atkins"
+date: "10/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part A: Nativeness ratings and self-perceived L2 speaking skills
+
+```{r}
+SelfRating <- c(4,5,4,7,3,4,6,7,7,7,6,2,3,1,5,4)
+NativenessRating <- c(32,33,28,48,24,24,32,41,42,38,42,16,18,16,36,34)
+Practical5a = data.frame(SelfRating, NativenessRating)
+```
+
+#### 2
+
+Ordinal measures are used for both the variables, self-rating and nativeness rating.
+
+#### 3
+
+The null hypothesis is that there is no difference between a person's own perceived speaking skills in an L2 and their speaking skills as perceived by others. The alternative hypothesis is that there is a positive difference between a person's own perceived speaking skills in an L2 and their speaking skills as perceived by others.
+
+#### 4
+```{r}
+plot(SelfRating, NativenessRating, main="Nativeness Rating over Self-Rating", ylab="Nativeness Rating", xlab="Self-Rating" )
+```
+
+**Figure 1** Plot of Nativeness Rating as a function of Self-Rating
+
+The relation is linear.
+
+#### 5
+
+The statistical test that could be used is Kendall's Tau or Spearman's rho.
+
+#### 6
+
+```{r}
+library('Kendall')
+cor.test(SelfRating, NativenessRating, method = "kendall", alternative = "greater", exact=FALSE)
+```
+
+Since the p-value, 2e-05, is less than the significance level 0.05 the null hypothesis can be rejected.
+
+#### 7 
+
+The effect size is 0.81, which means that it is a large effect size.
+
+#### 8 
+
+The meaningfulness of this outcome is that we cannot draw conclusions out of this study. It is difficult to draw conclusions based on a small sample of 16 participants, even though the effect size is large. We also do not know all the specifics of how nativeness is rated such as whether it is determined by the accent. If we could draw conclusions, we could say that there is a strong positive relationship between a person's own perceived speaking skills in an L2 and their speaking skills as perceived by others. In other words, the greater one's own perceived speaking skills, the greater their speaking skills are perceived by others.
+
+#### 9 
+
+A Kendall's Rank Correlation Tau test revealed that the association between self ranking and nativeness ranking was significant, p < 0.001. The direction of the association is that there is a strong relation for the greater the person's own perceived speaking skills in an L2 the greater their speaking skills as perceived by others. The $\tau$ coefficient value is 0.806. 
+
+#### 10
+
+```{r}
+library('pwr')
+pwr.r.test(power=0.8, r = 0.8064294, sig.level = 2e-05)
+```
+
+The power is lower than 0.8, it is 0.3. What can be concluded about the meaningfulness of the data is that we cannot draw conclusions out of this study as the probability of rejecting the null hypothesis when it is false is approximately 30 percent. In other words, there is not a high enough probabilty of avoiding a Type II error. To get a power of 0.8, there would need to be approximately 25 participants.
+
+## Part B: Age and writing scores
+
+#### 1
+
+```{r}
+Practical5b <- readRDS(file="Practical5B.rds")
+str(Practical5b)
+```
+
+#### 2
+
+The independent variable is age using a interval measure and the dependent variable is score using a interval measure.
+
+#### 3
+
+The null hypothesis is that there is no difference or no affect between age and writing scores. The alternative hypothesis is that age affects writing scores.
+
+#### 4
+
+```{r}
+library('car')
+scatterplot(score ~ age, data=Practical5b,
+   xlab="age", ylab="score",
+   main="Score over Age",)
+```
+
+**Figure 2** Plot of Score as a function of Age
+
+#### 5
+
+A statistical test that could be used to predict score on the basis of age is Pearson r or simple regression.
+
+#### 6
+
+```{r}
+model = lm(score~age, data=Practical5b)
+summary(model)
+library('effsize')
+cor.test(Practical5b$score,Practical5b$age,method="pearson")
+```
+
+#### 7
+
+Since the p-value is 6.736e-06 that is lower than the significance value of 0.05, the null hypothesis can be rejected.
+
+#### 8
+
+The effect size is derived from Pearson's r correlation and is estimated at 0.68, which is a medium efect size. Since the effect size represents the magnitude of the difference between groups, so the magnitude of the difference between age and score is medium. 
+
+#### 9
+
+##### a
+
+On the basis of the scatterplot made before, the line of best fit shows that the relationship between score and age is linear.
+
+##### b
+
+```{r}
+plot(fitted(model), residuals(model))
+ncvTest(model)
+```
+
+**Figure 3** Plot of residual model as a function of the fitted model
+
+The Non-Constant Error Variance test is non-significant, so homoscedasticity can be assumed.
+
+##### c
+
+```{r}
+qqnorm(residuals(model))
+shapiro.test(Practical5b$score)
+```
+
+**Figure 4** Plot of Sample Quantiles as a function of Theoretical Quantiles
+
+Since the dots approximately follow a straight line in the Quantile-Quantile plot, both of the plotted sets of quantiles come from the same distribution. 
+
+#### 10
+
+We constructed a linear model of score as a function of age. This model was significant (F(1,33) = 28.53, p < .001) and explained 0.4637 of the variance in the data (multiple R-squared). Regression coefficients are shown in Table X:
+
+**Table X** Regression coefficients for the linear model of score as a function of age
+
+```{r}
+intercept <- c(10.97, 7.08, 1.55, 0.13)
+age <- c(0.86, 0.16, 5.34, 6.74e-06)
+Table <- cbind(intercept,age)
+rownames(Table) <- c("Estimate", "SE", "t-value", "p-value")
+colnames(Table) <- c("Intercept", "Age")
+show(Table)
+```
+
+The direction of the effect is positive and this means that as age increases the writing score increases.
+
+## Part C: Instruction type and writing scores 
+
+#### 1
+
+```{r}
+Practical5c <- readRDS(file="Practical5C.rds")
+str(Practical5c)
+```
+
+#### 2
+
+The independent variables are types of instruction that is a nominal variable and age that is a interval variable and the dependent variable is writing score that is a interval variable.
+
+#### 3
+
+The null hypothesis would be that there is no effect of age on writing skill and there is no difference between the writings skills of the group that received guided writing and the group that received no guidance at all. The alternative hypothesis would be that there is an effect of age on writing skill and there is a difference between the writing skills of the group that received guidance and the group that received no guidance.
+
+#### 4
+
+```{r}
+library('ggplot2')
+qplot(age, score, colour=type , data=Practical5c)
+```
+
+**Figure 5** Scatterplot of Score as a function of Age
+
+In the plot, it can be seen that the guided group performed better than the group with no guidance but age seems to have a positive affect on the unguided group more than the guided group.
+
+#### 5
+
+```{r}
+boxplot(score~type, data=Practical5c, main="Writing Score over Group Type", xlab="Group Type", ylab="Writing Score")
+```
+
+**Figure 6** Boxplot of Score as a function of Instruction Group Type
+
+My first impression of the potential difference between the two instruction groups is that it could be seen on the quartile scatter plot but much clearer through the boxplot that the guided group has overall higher writing scores than the group that received no guidance.
+
+#### 6
+
+Since there are two independent variables, the statistic test that could be used is multiple linear regression. If the test is done with the independent variables seperately, then a Pearson r or simple regression for the interval independent variable and a independent samples t-test or paired samples t-test for the nominal independent variable could be used.
+
+#### 7
+
+```{r}
+model1 = lm(score~age + type, data=Practical5c)
+summary(model1)
+```
+
+The p-value of 1.082e-05 is less than the significance value of 0.05, the null hypothesis can be rejected.
+
+#### 8
+
+```{r}
+model2 = lm(score~age*type, data=Practical5c)
+summary(model2)
+```
+
+The p-value of 5.703e-08 is less than the significance value of 0.05, the null hypothesis can be rejected.
+
+#### 9 
+
+```{r}
+library('visreg')
+visreg(model2,xvar='age', by='type')
+```
+
+**Figure 7** Plot of Score as a function of Age
+
+#### 10
+
+Based on the scatterplot that was created, the effect size seems like a medium effect size. With a participant size of 35 and 17 samples in the no-guidance group and 18 samples in the guidance group, we cannot say the effect size is meaningful. This is because we are looking for are large effects with 30 participants per group to make the effect size meaningful.
+
+#### 11
+
+```{r}
+anova(model1,model2)
+```
+
+Since the p value of 0.0002175 is less than the significance value of 0.05, the interaction term is a significant improvement.
+
+#### 12
+
+##### a
+
+```{r}
+scatterplot(score ~ age + type, data=Practical5c,
+   xlab="age", ylab="score",
+   main="Score over Age and Type",)
+```
+
+**Figure 8** Plot of Score as a function of Age with Score as a function of Instruction Group Type labelled 
+
+##### b
+
+```{r}
+plot(fitted(model1), residuals(model1))
+plot(fitted(model2), residuals(model2))
+ncvTest(model1)
+ncvTest(model2)
+```
+
+**Figure 9** Plot of residual model as a function of fitted model
+
+Since no pattern is particularly observed in the plot, this means that all residuals vary more or less equally. The Non-Constant Error Variance test is non-significant so it shows that homoscedasticity can generally be assumed.
+
+##### c
+
+```{r}
+qqnorm(residuals(model1))
+shapiro.test(Practical5c$score)
+```
+
+**Figure 10** Plot of Sample Quantile as a function of Theoretical Quantile
+
+Since the dots approximately follow a straight line in the Quantile-Quantile plot, both of the plotted sets of quantiles come from the same distribution. The Shapiro-Wilk test also indicates that since the p-value at 0.788 is greater than the alpha level of 0.05, does not reject the null hypothesis that the data are from a normally distributed population. 
+
+##### d
+
+```{r}
+car::vif(model1)
+car::vif(model2)
+```
+
+#### 13
+
+We constructed a linear model of writing score as a function of age and instruction type. This model was significant (F(2,32) = 16.7, p < .001) and explained 0.51 of the variance in the data (multiple Rsquared). Regression coefficients are shown in Table Y:
+
+**Table Y** Regression coefficients for the linear model of score as a function of age and as a function of instruction type
+
+
+```{r}
+intercept2 <- c(67.5504, 7.2578, 9.307, 1.27e-10)
+age2 <- c(0.1317, 0.1687, 0.780, 0.441)
+typenone <- c(-25.0329, 4.3457, -5.760, 2.17e-06)
+Table2 <- cbind(intercept2,age2,typenone)
+rownames(Table2) <- c("Estimate", "SE", "t-value", "p-value")
+colnames(Table2) <- c("Intercept", "Age", "Instruction Group Type")
+show(Table2)
+```
+
+
+In terms of meaningfulness, we can draw conclusions out of this study that age has a positive effect on writing score and that the instruction type that is the group with guidance effected the writing score positively compared to the instruction type without any guidance.

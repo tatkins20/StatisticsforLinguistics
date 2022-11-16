@@ -1,0 +1,267 @@
+---
+title: "Practical 6"
+author: "Trevor Atkins"
+date: "10/13/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part A: Exposure and vocabulary scores
+
+#### 1
+
+```{r}
+Practical6a <- readRDS(file="Practical6A.rds")
+str(Practical6a)
+```
+
+#### 2
+
+Subject and time are nominal variables and score is a interval variable.
+
+#### 3
+
+The null hypothesis is that there is no difference in score between the pre-test and post-test. The alternative hypothesis is that there is a difference in score between the pre-test and post-test.
+
+#### 4
+
+```{r}
+library("psych")
+Pretest <- subset(Practical6a, Time == "pre")
+Posttest <- subset(Practical6a, Time == "post")
+aggregate(Score~Time, Practical6a, max)
+aggregate(Score~Time, Practical6a, min)
+aggregate(Score~Time, Practical6a, mean)
+aggregate(Score~Time, Practical6a, sd)
+describe(Practical6a$Score)
+```
+
+**Table X** Descriptives for score as a function of test type
+
+value | Overall | Pretest | Posttest | 
+-    | -     | -    | -     | 
+mean | 9.36 | 9.86 | 8.86 |
+max | 17 | 17 | 15 |
+min | 3 | 3 | 3 |
+sd | 3.13  | 3.19 | 3.02 | 
+
+#### 5
+
+A statistical test that could be used to check whether there is a difference between the pre-test and the post-test is a paired-samples t-test.
+
+#### 6
+
+```{r}
+shapiro.test(Practical6a$Score)
+t.test(Score~Time, data=Practical6a, paired=TRUE)
+```
+
+#### 7
+
+```{r}
+library('effsize')
+cohen.d(Practical6a$Score,Practical6a$Time)
+```
+
+The effect size is 0.32 and is a small effect size.
+
+#### 8
+
+```{r}
+library('pwr')
+pwr.t.test(n=42, d=0.32, sig.level= 0.05)
+```
+
+The meaningfulness of this outcome is we cannot determine whether the difference between the pretest and posttest is not significant because in order for a small effect size to be significant, 783 participants (per group in a means analysis) is needed. Even though the Shapiro-Wilk test allows us to assume that the data is normally distributed and we know how the test was implemented, more participants are required to detect the small effect size. 
+
+#### 9
+
+A paired samples t-test revealed that the pretest group and posttest group did not have much difference between score. This difference was significant, t=2.29, p = 0.03, 95% CI [0.12, 1.88]. This effect was of a small size, r2/d = 0.32.
+
+## Part B: Instruction and writing scores
+
+#### 1 and 2
+
+The dependent variable is the writing score that is a interval measure, the independent variables include (no instruction, lectures, and guided writing) the instruction type that is a nominal measure.
+
+#### 3
+
+In the case of independent variables, the independent variable has 3 levels.
+
+#### 4
+
+```{r}
+Student <- seq(1, 30)
+Type <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
+Score <- c(34, 58, 56, 47, 35, 31, 55, 65, 61, 27, 65, 54, 43, 57, 65, 49, 74, 79, 54, 65, 68, 87, 94, 69, 81, 75, 94, 78, 63, 78)
+Practical6b = data.frame(Student, Type, Score)
+Practical6b$Student <- as.factor(Practical6b$Student)
+Practical6b$Type <- as.factor(Practical6b$Type)
+```
+
+#### 5
+
+The null hypothesis is that there is no difference between the three instruction types and their writing scores. The alternative hypothesis is that there is a difference between the three instruction types and their writing scores.
+
+#### 6
+
+A statistical test that could be used is a one way ANOVA.
+
+#### 7
+
+**Figure 1: ** Boxplot of Writing Score over Instruction Type
+
+```{r}
+boxplot(Score~Type, data=Practical6b, main="Writing Score over Instruction Type", xlab="Instruction Type", ylab="Writing Score")
+```
+
+According to the boxplot, the guided writing instruction group seems to have performed the best in writing score out of the three instruction type groups.
+
+#### 8
+
+```{r}
+by(Score, Type, describe)
+describe(Practical6b$Score)
+```
+
+**Table Y** Descriptives for score as a function of type of instruction 
+
+value | Overall | No Instruction | Lectures | Guided Writing |
+-    | -     | -    | -     | 
+mean | 62.03 | 46.9 | 60.5 | 78.7 |
+max | 94 | 65 | 79 | 94 |
+min | 27 | 27 | 43 | 63 | 
+sd | 17.6  | 13.96 | 11.16 | 10.6 | 
+
+#### 9
+
+**Figure 2: ** Histogram of Density over Vocabulary Score
+
+```{r}
+hist(Practical6b$Score, prob=TRUE, xlab="Writing Score")
+curve(dnorm(x, mean=mean(Practical6b$Score),sd=sd(Practical6b$Score)), add=TRUE)
+library('car')
+leveneTest(Score~Type, data=Practical6b)
+Test = aov(Score~Type, data=Practical6b)
+summary(Test)
+TukeyHSD(Test)
+```
+
+Since the p-value is 1.24e-05 and is less than the significance value of 0.05, we can reject the null hypothesis. The difference in means between the two groups for no instruction is 13.6, lectures is 31.8, and Guided Writing is 18.2.
+
+#### 10
+
+```{r}
+r2 <- summary.lm(Test)$r.squared
+sqrt(r2)
+library('sjstats')
+library('pwr')
+anova_stats(Test)
+pwr.anova.test(k=3, n=10, f=1.144 , sig.level=1.24e-05)
+```
+
+The effect size is 0.75, which is a large effect size.
+
+
+#### 11
+
+The meaningfulness of this outcome is that there is a significant difference of a large magnitude between the instruction types and the writing scores. Specifically that there is a positive effect on writing scores in the order of no instruction, lecture, to guided writing. 
+
+#### 12
+
+There was a significant effect of instruction type on writing score, F(2, 27) = 1.0496, p = 0.3639. This effect was of a large size, r2/η2=0.7530231.
+
+A Tukey post hoc analysis [or Bonferroni] revealed that the GW (guided writing) group (M=78.7, SD=10.6) did score significantly higher than the lecture group (M=60.5, SD=11.2), p < .001], 95% CI [18.494904, 45.1051] and the no instruction group (M=46.9, SD=13.96), p = 0.0443937, 95% CI [0.294904, 26.9051]. No significant differences were found between lecture group and no instruction group.
+
+## Part C: Subtitles and vocabulary learning
+
+#### 1
+
+```{r}
+Practical6c <- readRDS(file="Practical6C.rds")
+str(Practical6c)
+```
+
+#### 2
+
+The dependent variable is score which has a interval measure, the independent variables are proficiency and subtitles which are both nominal measures.
+
+#### 3
+
+The null hypothesis is that there is no difference between low proficient and high proficient Dutch-English learners and there is no effect of subtitles in the L2 (English subtitles in English shows) to subtitles in the L1 (Dutch subtitles in English shows) on vocabulary or proficiency score. The alternative hypothesis is that there is a difference between low proficient and high proficient Dutch-English learners and there is an effect of subtitles in the L2 to subtitles in the L1 on vocabulary or proficiency score.
+
+#### 4
+
+A statistical test that could be used is factorial ANOVA or multiple linear regression.
+
+#### 5
+
+```{r}
+library('psych')
+by(Practical6c$Score, list(Practical6c$Proficiency, Practical6c$Subtitles), describe)
+describe(Practical6c$Score)
+```
+
+**Table Z** Descriptives for score as a function of proficiency and subtitles
+
+value | Overall | High L1 | Low L1 | High L2 | Low L2 |
+-    | -        | -      | -       | -       | -      |
+mean |    8     |  4.53  |  9.73   |  13.53  |   4.2  |
+max |    18     |  10    |   13    |  18     |  12    |
+min |    -3     |  -2    |   5     |    8    |  -3    |
+sd |    5.18    | 3.98   |  2.52   |    3.5  |   3.78 |
+
+#### 6
+
+**Figure 3** Plot of Score as a function of Proficiency and Subtitles
+
+```{r}
+#boxplot(Practical6c$Score ~ Practical6c$Proficiency + Practical6c$Subtitles)
+library('ggplot2')
+ggplot(data = Practical6c, aes(x = Proficiency, y = Score, fill = Subtitles)) +
+geom_boxplot(aes(fill = Subtitles), width = 1) + theme_bw() + ggtitle("Score as a function of Proficiency and Subtitles") + labs(x="Proficiency",y="Score",
+fill="Subtitles")
+
+```
+#### 7
+
+```{r}
+library('car')
+leveneTest(Practical6c$Score, interaction(Practical6c$Proficiency, Practical6c$Subtitles))
+library('pastecs')
+by(Practical6c$Score,Practical6c$Proficiency, stat.desc,
+basic=FALSE, norm=TRUE)
+by(Practical6c$Score,Practical6c$Subtitles, stat.desc,
+basic=FALSE, norm=TRUE)
+```
+
+```{r}
+contrasts(Practical6c$Proficiency) <- c(-1, 1)
+contrasts(Practical6c$Subtitles) <- c(-1, 1)
+model = aov(Score ~ Proficiency*Subtitles, data=Practical6c)
+model
+library('car')
+anovamodel <- Anova(model, type="III")
+anovamodel
+```
+
+The different null hypothesis that I formulated before can be rejected since the p-values are all less than or equal to the significance value of 0.05. 
+
+#### 8
+
+```{r}
+library('sjstats')
+anova_stats(model)
+```
+
+The effect size for the two main effects are: Proficiency = 0.066 and Subtitles = 0.043. Proficiency is a medium effect size and Subtitles is a small effect size nearing on medium. The interaction is 0.516 which is a large effect size.
+
+
+#### 10
+
+There was a significant main effect of Proficiency on Writing Score, F(1, 1) = 5.2544, p <.001. This effect was medium, ωp2 = 0.066. There was also a significant main effect of Subtitles on Writing Score, F(1, 1) = 3.6962, p = 0.05963. This effect was small, ωp2 = 0.043.
+
+There was a significant interaction effect between Proficiency and Subtitles, F(1, 1) = 64.9615, p <.001}. This effect was large, ωp2 = 0.516. This interaction showed that it is the most significant effect since partial ωp2 assesses the effect sizes of each effect while partialling out the other effects. It also shows that a combination of proficiency and subtitles shows more significant correlations of effect on writing score. Specifically, the writing score was higher for High Proficiency (M = 9.03, SD = 5.88) than for Low Proficiency (M = 6.97, SD = 4.23) in L1 Subtitles, but they differed in L2 Subtitles with higher scores for L2 Subtitles (M = 8.87, SD = 5.95) than for L1 Subtitles (M = 7.13, SD = 4.21) in L1 Subtitles.

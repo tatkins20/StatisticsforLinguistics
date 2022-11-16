@@ -1,0 +1,283 @@
+---
+title: "Practical Exam"
+author: "Trevor Atkins"
+date: "10/26/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages(c("rmarkdown", "psych", "pastecs", "car", "effsize", "gmodels", "vcd", "pwr", "sjstats", "ggplot2", 
+"visreg", "DescTools", "rcompanion", "caTools", "bitops"))
+```
+
+## a: Learning Environment and Vocab:
+
+#### 1 
+
+The independent variable is the study environment that is on a nominal scale and has two levels - "library" and "cafe". The dependent variable is the number of vocabulary learned in an hour, which is a interval scale. 
+
+#### 2
+
+The appropriate perspective is comparing the means of the two different groups. The appropriate statisitcal test is the t-test.
+
+#### 3
+
+The null hypothesis is that the study environment does not affect the amount of vocabulary learned.
+
+The alternative hypothesis is that the study environment does affect the amount of vocabulary learned.
+
+#### 4
+
+```{r}
+dataQA <- read.csv2("StatsTest20-LocationLearning(1).csv")
+dataQA$Environment <- as.factor(dataQA$Environment)
+str(dataQA)
+```
+
+Calculating the descriptives:
+
+```{r}
+by(dataQA$Score, dataQA$Environment, mean)
+by(dataQA$Score, dataQA$Environment, min)
+by(dataQA$Score, dataQA$Environment, max)
+by(dataQA$Score, dataQA$Environment, sd)
+```
+
+**Table 1** : Descriptives for the two study environment groups
+
+
+| value | Library | Cafe |
+ - | - | - 
+| mean |  7.17    | 9.17 |
+| minimum | 1     | 3    |
+| maximum | 15    | 18   |
+| sd      | 3.57       | 3.25 |
+
+
+Since means are being compared, normality and homogeneity of varience will have to be checked. Since the sample size is larger than 30, it is better to combine skewness and kurtosis (the 2SE values) with a histogram evaluation.
+
+```{r}
+library("pastecs")
+by(dataQA$Score, dataQA$Environment, stat.desc, basic=FALSE, norm=TRUE)
+```
+
+The values of Skew.2SE and Kurt.2SE are between -1 and 1 for both groups, so the data can be assumed to be normally distributed but the histogram also needs to be evaluated.
+
+```{r}
+hist(dataQA$Score[dataQA$Environment =="1"], prob=TRUE, xlab = "difference", main = "histogram of difference for library study environment")
+curve(dnorm(x, mean=mean(dataQA$Score[dataQA$Environment =="1"]), sd=sd(dataQA$Score[dataQA$Environment =="1"])), add=TRUE)
+```
+
+**Figure 1**: Probabilities of difference in vocabulary for library study environment group
+
+```{r}
+hist(dataQA$Score[dataQA$Environment =="2"], prob=TRUE, xlab = "difference", main = "histogram of difference for cafe study environment")
+curve(dnorm(x, mean=mean(dataQA$Score[dataQA$Environment =="2"]), sd=sd(dataQA$Score[dataQA$Environment=="2"])), add=TRUE)
+```
+
+**Figure 2** : Probabilities of difference in vocabulary for cafe study environment group
+
+These histograms show that the data does slightly deviate from the normal distribution.
+
+```{r}
+library(car)
+leveneTest(Score~Environment, data=dataQA)
+```
+
+The p-value is .2625, so homogeneity of variance can be assumed.
+
+```{r}
+library(psych)
+by(dataQA$Score, dataQA$Environment, describe)
+boxplot(dataQA$Score~dataQA$Environment, ylab="difference in vocab", xlab="study environment", main="number of vocabulary difference by study environment group")
+```
+
+
+**Figure 3**: Boxplot showing the dispersion of scores in the library study environment group (left) and the cafe study environment group (right)
+
+```{r}
+ttest = t.test(dataQA$Score~dataQA$Environment)
+ttest
+```
+
+```{r}
+t <- ttest$statistic[[1]]
+df <- ttest$parameter[[1]]
+r2 <- t^2/(t^2+df)
+round(r2,3)
+```
+
+Value of statistic: t=-2.89
+Significance: p = .005
+Decision Null Hypothesis: Since p = .005, we can reject null hypothesis
+
+On average, students in a cafe study environment show greater difference in the vocabulary (M=7.17, SD=3.57) than students in a library study environment (M=9.17, SD=3.25). This difference was significant t(92)=-2.895, p = 0.004733, 95% CI [-3.3598010, -0.6257063], and the effect size was small (r2 = .083).
+
+**Meaningfulness**
+
+In terms of power we know that for a small effect size you probably need about 780 participants per group for a power of 0.8. In this case, we can say that we don't have enough partipants to reach this power of 0.8. As for the methodology of the study, we would maybe want to know more about the participants and how they were tested. This study assumes that all the students have the same L1 background before learning Polish words. It would thus be interesting to see whether a randomized sample of L1 backgrounds could reduce the chance of that variable being a factor in contributing bias to the samples.
+
+
+## b: Sleep, Lexical Decision Accuracy, and Gender:
+
+#### 1 
+
+The independent variables are the amount of sleep that is on a interval scale (with 1 level) and gender that is on a nominal scale with 2 levels (male and female). The dependent variable is the accuracy score of the lexical decision task that is a interval scale.
+
+#### 2
+
+The appropriate perspective is comparing the means of the two different groups and assessing the relationship between sleep and performance. The appropriate statisitcal test is the multiple linear regression since there is both a nominal and an interval independent variable.
+
+#### 3
+
+Hypothesis group 1:
+
+The null hypothesis is that there is no effect of sleep on the lexical task performance.
+
+The alternative hypothesis is that there is an effect of sleep on the lexical task performance.
+
+Hypothesis group 2:
+
+The null hypothesis is that there is no impact of gender on lexical task performance.
+
+The alternative hypothesis is that there is an impact of gender on lexical task performance.
+
+Hypothesis group 3:
+
+There is no interaction between the effects of gender and sleep.
+
+There is an interaction between the effects of gender and sleep.
+
+#### 4
+
+```{r}
+dataQB <- read.csv2("StatsTest20_SleepAccuracy_BS(1).csv")
+dataQB$player <- as.factor(dataQB$player)
+dataQB$gender <- as.factor(dataQB$gender)
+dataQB$sleep <- as.numeric(dataQB$sleep)
+str(dataQB)
+```
+
+```{r}
+by(dataQB$score, dataQB$gender, describe)
+```
+
+```{r}
+library(ggplot2)
+qplot(sleep, score, colour = gender, data = dataQB)
+```
+
+**Figure 4**: Scatterplot showing the relationship between sleep (x-axis) and score (y-axis) with separated colours for people who are male (blue) and those who are female (orange).
+
+The pattern in Figure 4 reveals that there seems to be a linear positive relationship between sleep and score. The people who are female additionally seem to score higher overall than those who are male.
+
+```{r}
+m1 = lm(score~sleep + gender, data = dataQB)
+summary(m1)
+```
+
+Negative effect of gender and positive effect of sleep, but is there also an interaction?
+
+```{r}
+m2 = lm(score~sleep*gender, data = dataQB)
+summary(m2)
+```
+
+There is no significant interaction between sleep and gender. To be sure, we can check this in a visualization using the visreg package.
+
+```{r}
+library("visreg")
+visreg(m2,xvar="sleep", by="gender")
+```
+**Figure 5**: Plot of the slopes of the effect of sleep for people who are female (left) and those who are male (right).
+
+The effects look very much the same, confirming the absence of an interaction.
+
+```{r}
+anova(m1, m2)
+```
+
+The ANOVA reveals that model 2 (with the interaction) is not better at explaining the variance than model 1. So, we’ll stick with the simpler model 1 with the main effects only.
+
+We do still need to check our assumptions:
+
+linearity;
+heteroskedasticity;
+normally distributed residuals;
+collinearity.
+
+```{r}
+plot(fitted(m1), residuals(m1))
+```
+**Figure 6**: Scatterplot showing the residuals and their deviations from the fitted values.
+
+The relationship is linear (also see Figure 4) and the residuals plot in Figure 6 does not reveal any signs of heteroskedasticity. To be sure about the second assumption, we can do the non Constant Variance error test.
+
+```{r}
+ncvTest(m1)
+```
+
+The ncvTest is non-significant, so we can assume homoscedasticity.
+
+Remember that the residuals also have to be normally distributed, so we’ll have to check that as well.
+
+```{r}
+qqnorm(residuals(m1))
+```
+
+**Figure 7**: qqplot of the residuals.
+
+The qqplot indicates that the data follow a straight line, so it approximates the normal distribution. Note that this could also have been checked by plotting a histogram of the residuals or even by performing a Shapiro-Wilk on the residuals.
+
+```{r}
+shapiro.test(residuals(m1))
+```
+The Shapiro-Wilk confirms that the residuals of our model are normally distributed.
+
+Based on common sense, we would not expect any correlations between sleep and accuracy on the lexical decision test, but we can check using the VIF.
+
+```{r}
+car::vif(m1)
+```
+
+As the values are well below 5, we can assume that there is no collinearity issue.
+
+```{r}
+summary(m1)
+```
+
+We constructed a linear model of proficiency score as a function of sleep and gender. This model was significant (F(2,53)=17.39, p< .001) and explained 37.34% of the variance in the data (adjusted R-squared). Regression coefficients are shown in Table 2. The negative coefficient for age of acquisition reveals that, as sleep increases the accuracy increases significantly. The negative coefficient for gender indicates a significantly lower proficiency score for those who are male as compared to those who are female. This pattern can also be seen in Figure 8 below.
+
+**Table 2**: Regression coefficients for the linear model of score as a function of sleep and gender.
+
+
+ | - | Estimate | SE | t-value | p-value |
+ | - | - | - | - | - 
+ Intercept | 7.4348 | 0.8879 | 8.373 | 2.85e-11 |
+ Sleep     | 0.7793 | 0.1351 | 5.771 | 4.19e-07 |
+ Gender=male | -0.7043 | 0.5869 | -1.200 | 0.236 |
+ 
+
+```{r}
+boxplot(dataQB$score~dataQB$gender, ylab="Accuracy of Lexical Decision Task", main="Effect of gender on scores")
+```
+**Figure 8**: Box plot of the dispersion in scores for the people who are female (left) and those who are male (right).
+
+**Meaningfulness**
+
+```{r}
+0.3734/(1-0.3734)
+```
+
+
+```{r}
+library(pwr)
+pwr.f2.test(u=2, v=53, f2=0.5959, sig.level=1.56e-06) # where the sig.level is the p-value of the model.
+```
+
+The power is 0.499, which is not the 0.8 that we want. Therefore, we can say that we don't have enough partipants to reach this power of 0.8. As for the methodology of the study, we would maybe want to know more about the lexical decision task and further description on the educational background of the participants. 
+

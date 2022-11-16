@@ -1,0 +1,33 @@
+---
+title: "Practical 1"
+author: "Trevor Atkins"
+date: "9/3/2020"
+output: html_document
+---
+
+## Practical 1: test
+
+```{r}
+20*10
+```
+
+## Part 3: Importing and Looking at Data
+```{r}
+Practical1 <- read.csv(file="Data-Practical1.csv", head=TRUE, sep=";")
+head(Practical1)
+tail(Practical1)
+head(Practical1, 10)
+class(Practical1)
+names(Practical1)
+str(Practical1)
+Practical1$gender <- as.factor(Practical1$gender)
+Practical1$gender <- factor(Practical1$gender,
+levels = c(1,2),
+labels = c("Female", "Male"))
+Practical1$participant <- as.factor(Practical1$participant)
+summary(Practical1)
+str(Practical1)
+saveRDS(Practical1, file="Practical1.rds")
+write.csv(Practical1, file="Practical1.csv")
+```
+

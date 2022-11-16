@@ -1,0 +1,217 @@
+---
+title: "Practical 3"
+author: "Student Number: S4555376, Name: Trevor Atkins"
+date: "9/22/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Part A
+### 1. Importing Data and Creating a Markdown File
+```{r}
+Practical3a <- read.csv(file="Data-Practical3a.csv", head=TRUE, sep=";")
+head(Practical3a)
+Practical3a$TOTAL <- as.integer(Practical3a$TOTAL)
+Practical3a$Student <- as.factor(Practical3a$Student)
+Practical3a$teacher <- as.factor(Practical3a$teacher)
+Practical3a$group <- as.factor(Practical3a$group)
+str(Practical3a)
+```
+### 2. Descriptives and Graphs for Groups
+#### 2a
+```{r}
+install.packages("psych")
+library("psych")
+G1A <- subset(Practical3a, group == "1A") 
+G1B <- subset(Practical3a, group == "1B") 
+G1C <- subset(Practical3a, group == "1C") 
+G1D <- subset(Practical3a, group == "1D") 
+G1E <- subset(Practical3a, group == "1E") 
+aggregate(TOTAL~group, Practical3a, max)
+aggregate(TOTAL~group, Practical3a, min)
+aggregate(TOTAL~group, Practical3a, mean)
+aggregate(TOTAL~group, Practical3a, range)
+aggregate(TOTAL~group, Practical3a, sd)
+describe(Practical3a$TOTAL)
+```
+
+**Table 1: ** Shows the Max, Min, Mean, Range, and Standard Deviation Proficiency Scores for the Students by Group
+
+value | Overall | G1A | G1B | G1C | G1D | G1E
+- | - | - | - | - | - | -
+mean | 73.5 | 76.1 | 81.2 | 64.6 | 69.0 | 73.1
+max | 119 | 106 | 119 | 92 | 116 | 116
+min | 10 | 10 | 22 | 28 | 22 | 40
+range | 109 | 96 | 97 | 64 | 94 | 76
+sd | 23.2 | 21.6 | 21.8 | 18.7 | 27.2 | 24.0
+
+(1) The Group 1B seems to have performed the best. 
+(2) The Group 1C performed most homogeneously.
+
+#### 2b
+
+```{r}
+aggregate(TOTAL~teacher,Practical3a,mean)
+aggregate(TOTAL~teacher,Practical3a,sd)
+```
+Teacher A performed best as it scored more homogeneously (closer to the mean) and its mean is higher than Teacher B.
+
+#### 2c
+
+```{r}
+boxplot(TOTAL~teacher, data=Practical3a, main="TOTAL over Teachers", xlab="Teachers", ylab="TOTAL")
+```
+
+**Figure 1: ** Boxplot of Total Score over Teacher groups A&B  
+
+### 3. Checking for Normality
+#### 3a
+```{r}
+hist(Practical3a$TOTAL, prob=TRUE, xlab="TOTAL")
+curve(dnorm(x, mean=mean(Practical3a$TOTAL),sd=sd(Practical3a$TOTAL)), add=TRUE)
+```
+
+**Figure 2: ** Histogram of Density over Total Score
+
+#### 3b
+
+At face value when looking at the histogram, the results approximately follow the normal distribution although there are some clear outliers.
+
+### 4. Using Z-Scores
+
+```{r}
+scale(Practical3a$TOTAL, center = TRUE, scale = TRUE)
+Practical3a$zscore <- scale(Practical3a$TOTAL, center = TRUE, scale = TRUE)
+S11 <- subset(Practical3a, student = "11")
+S33 <- subset(Practical3a, student = "33")
+S44 <- subset(Practical3a, student = "44")
+S55 <- subset(Practical3a, student = "55")
+by = c("11", "33", "44", "55")
+dataframe = subset(Practical3a, Student %in% by)
+show(dataframe)
+```
+Since the z-scores show how many standard deviations a student is away from the mean, Student 11 is 0.71 above the mean, Student 33 is 1.75 below the mean, Student 44 is 1.96 above the mean, and Student 55 is 1.10 above the mean. 
+
+### 5. Preparing for Inductive Statistics
+
+#### 5a 
+
+My first impression about the difference between the groups of the two teachers is that the group of Teacher A based on TOTAL performs better than the group of Teacher B. 
+
+#### 5b
+
+The null hypothesis belonging to the research question is that there is no significant difference between the total scores of the students of teacher A and the total scores of the students of teacher B.
+
+#### 5c
+```{r}
+install.packages("pastecs")
+library("pastecs")
+stat.desc(Practical3a$TOTAL, basic=FALSE, norm=TRUE)
+by(Practical3a$TOTAL, Practical3a$teacher, stat.desc,
+basic=FALSE, norm=TRUE)
+```
+
+The values of Skew.2SE and Kurt.2SE are within the -1.29 and 1.29 range: Skew.2SE for teacher A is -1.18 and Kurt.2SE for teacher A is 0.51. Skew.2SE for teacher B is 0.14 and Kurt.2SE is -0.73. Because the sample is of 130 students, we can assume that the values are close enough to a normal distribution. Since both teacher A and teacher B have Skew.2SE and Kurt.2SE values that are also within the -1.29 and 1.29 range, we can say that the data of the two teachers are normally distributed.
+
+### 6. Checking for Normality Using a Test
+
+#### 6a
+
+The null hypothesis for comparing our group's distribution to the normal distribution is that the data are not distributed according to the normal distribution.
+
+#### 6b
+
+```{r}
+TA = subset(Practical3a, teacher == "A")
+TB = subset(Practical3a, teacher == "B")
+shapiro.test(as.numeric(unlist(TA)))
+shapiro.test(as.numeric(unlist(TB)))
+```
+For both teacher A and teacher B, the significance value is less than 2.2e-16, which means that it is not above 0.05 and it cannot be assumed that the data are normally distributed.
+
+### 7. Checking for Equality of Variance
+
+#### 7a
+```{r}
+sd(unlist(G1A))
+sd(unlist(G1B))
+sd(unlist(G1C))
+sd(unlist(G1D))
+sd(unlist(G1E))
+```
+The largest standard deviation is 27.5 and the smallest standard deviation is 16.3. These groups are equal in their variance, using the rule of thumb that the largest standard deviation is not more than twice as big as the smallest standard deviation.
+
+#### 7b
+In this case, H0 would be that there is no difference between the equal variance of the groups.
+
+
+#### 7c
+```{r}
+install.packages('car')
+library('car')
+leveneTest(TOTAL~teacher, data=Practical3a)
+```
+Since the Pr(>F) siginificance level is smaller than 0.05 at 0.33, equal variances cannot be assumed.
+
+### 8. Performing the T-Test
+
+#### 8a
+```{r}
+ t.test(Practical3a$TOTAL ~ Practical3a$teacher, var.equal = FALSE)
+```
+
+#### 8b
+The conclusion I would draw with regard to the research question in 2b is that the teacher group A performs better compared to teacher group B. The chance of incorrectly rejecting the H0 is 0.0242 or 2.42%. This means that we can reject the H0. My conclusion about the H0 is in line with what I would expect from the descriptives.
+
+
+## Part B
+```{r}
+Practical3b <- read.csv(file="Data-Practical3b.csv", head=TRUE, sep=";")
+head(Practical3b)
+Practical3b$Participant <- as.factor(Practical3b$Participant)
+Practical3b$Motivation <- as.factor(Practical3b$Motivation)
+str(Practical3b)
+High <- subset(Practical3b, Motivation == "High")
+Low <- subset(Practical3b, Motivation == "Low")
+aggregate(Voc.Score~Motivation, Practical3b, max)
+aggregate(Voc.Score~Motivation, Practical3b, min)
+aggregate(Voc.Score~Motivation, Practical3b, mean)
+aggregate(Voc.Score~Motivation, Practical3b, range)
+aggregate(Voc.Score~Motivation, Practical3b, sd)
+describe(Practical3b$Voc.Score)
+boxplot(Voc.Score~Motivation, data=Practical3b, main="Vocabulary Score over Motivation", xlab="Motivation", ylab="Vocabulary Score")
+```
+
+**Figure 3: ** Boxplot of Vocabulary Score over Motivation
+
+```{r}
+hist(Practical3b$Voc.Score, prob=TRUE, xlab="Vocabulary Score")
+curve(dnorm(x, mean=mean(Practical3b$Voc.Score),sd=sd(Practical3b$Voc.Score)), add=TRUE)
+```
+
+**Figure 4: ** Histogram of Density over Vocabulary Score
+
+```{r}
+stat.desc(Practical3b$Voc.Score, basic=FALSE, norm=TRUE)
+by(Practical3b$Voc.Score, Practical3b$Motivation, stat.desc,
+basic=FALSE, norm=TRUE)
+shapiro.test(unlist(High))
+shapiro.test(unlist(Low))
+leveneTest(Voc.Score~Motivation, data=Practical3b)
+t.test(Practical3b$Voc.Score ~ Practical3b$Motivation, var.equal = FALSE)
+```
+
+**Table 2: ** Shows the Max, Min, Mean, Range, and Standard Deviation Proficiency Scores for the Vocabulary Score by Motivation
+
+value | Overall | High | Low | 
+- | - | - | - | - | - | -
+mean | 23.4 | 23.88 | 22.86 |
+max | 39 | 39 | 37 |
+min | 8 | 9 | 8 |
+range | 31 | 30 | 29 | 
+sd | 5.25 | 5.22 | 5.24 | 
+
+The H0, or null hypothesis, is that there is no significant effect of motivation on the vocabulary scores. The High motivation group performed better and scored more homogeneously. At face value when looking at the histogram, the majority of the results approximately follow the normal distribution.The values of Skew.2SE and Kurt.2SE are within the -1.29 and 1.29 range: Skew.2SE for ligh motivation is 0.13 and Kurt.2SE is 0.68. Skew.2SE for low motivation is -0.66 and Kurt.2SE is -0.04. Because the sample is of 130 students, we can assume that the values are close enough to a normal distribution. Since both high and low motivation have Skew.2SE and Kurt.2SE values that are also within the -1.29 and 1.29 range, we can say that the data of the two teachers are normally distributed. For both high and low motivation, the significance value is less than 2.2e-16, which means that it is not above 0.05 and it cannot be assumed that the data are normally distributed. Since the Pr(>F) siginificance level is larger than 0.05 at 0.73, equal variances can be assumed. The chance of incorrectly rejecting the H0 is 0.0457 or 4.57%. This means that we can reject the H0. My conclusion about the H0 is in line with what I would expect from the descriptives.
+ 
