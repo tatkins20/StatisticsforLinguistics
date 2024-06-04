@@ -1,1 +1,2 @@
 Master Level Practicals for Computational Linguistics done in R
+This course introduces students to the methods and techniques used in linguistic analyses, and familiarizes them with the principles of statistics. In addition, students will be trained to apply basic statistical analyses in R, like t-tests, simple ANOVA's and regression, and will be trained in being critical towards research done by others.
